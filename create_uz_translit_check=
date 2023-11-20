@@ -82,7 +82,8 @@ function Translit
         }
     Write-Output $outCHR
  }
-$users = Get-Content C:\Users\pvpeleshenko\Desktop\users.txt
+#указать путь к файлу ФИО пользователей
+$users = Get-Content C:\Users\______\Desktop\users.txt
 Write-Host;
 Write-Host "Вводные данные:" -ForegroundColor Gray
 Write-Host;
