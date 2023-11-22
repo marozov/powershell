@@ -1,65 +1,139 @@
-# Функция для конвертации кириллицы в латиницу с помощью ConvertFrom-Cyrillic
-function Translit {
+function Translit
+{
     param([string]$inString)
-    $outString = $inString | ConvertFrom-Cyrillic -To Latin
-    Write-Output $outString
-}
-
-# Функция для генерации имени пользователя из фамилии, имени и отчества
-function GenerateUserName {
-    param([string]$surname, [string]$firstname, [string]$middlename)
-    # Преобразуем все строки в нижний регистр
-    $surname = $surname.ToLower()
-    $firstname = $firstname.ToLower()
-    $middlename = $middlename.ToLower()
-    # Берем первую букву имени и отчества
-    $firstname = $firstname[0]
-    $middlename = $middlename[0]
-    # Склеиваем все части имени пользователя
-    $userName = $firstname + $middlename + $surname
-    # Конвертируем кириллицу в латиницу
-    $userName = Translit($userName)
-    Write-Output $userName
-}
-
-# Функция для проверки существования пользователя в Active Directory и добавления случайного числа при необходимости
-function CheckUserExists {
-    param([string]$userName)
-    $userExists = $true
-    while ($userExists) {
-        # Проверяем, есть ли пользователь с таким именем в Active Directory
-        $userExists = [bool] (Get-ADUser -Filter { SamAccountName -eq $userName })
-        if ($userExists) {
-            # Если есть, то добавляем случайное число от 1 до 9 к имени пользователя
-            $userName = $userName + (Get-Random -Minimum 1 -Maximum 9)
-        }
+    $Translit = @{
+    [char]'а' = "a"
+    [char]'А' = "A"
+    [char]'б' = "b"
+    [char]'Б' = "B"
+    [char]'в' = "v"
+    [char]'В' = "V"
+    [char]'г' = "g"
+    [char]'Г' = "G"
+    [char]'д' = "d"
+    [char]'Д' = "D"
+    [char]'е' = "e"
+    [char]'Е' = "E"
+    [char]'ё' = "yo"
+    [char]'Ё' = "Yo"
+    [char]'ж' = "zh"
+    [char]'Ж' = "Zh"
+    [char]'з' = "z"
+    [char]'З' = "Z"
+    [char]'и' = "i"
+    [char]'И' = "I"
+    [char]'й' = "j"
+    [char]'Й' = "J"
+    [char]'к' = "k"
+    [char]'К' = "K"
+    [char]'л' = "l"
+    [char]'Л' = "L"
+    [char]'м' = "m"
+    [char]'М' = "M"
+    [char]'н' = "n"
+    [char]'Н' = "N"
+    [char]'о' = "o"
+    [char]'О' = "O"
+    [char]'п' = "p"
+    [char]'П' = "P"
+    [char]'р' = "r"
+    [char]'Р' = "R"
+    [char]'с' = "s"
+    [char]'С' = "S"
+    [char]'т' = "t"
+    [char]'Т' = "T"
+    [char]'у' = "u"
+    [char]'У' = "U"
+    [char]'ф' = "f"
+    [char]'Ф' = "F"
+    [char]'х' = "h"
+    [char]'Х' = "H"
+    [char]'ц' = "c"
+    [char]'Ц' = "C"
+    [char]'ч' = "ch"
+    [char]'Ч' = "Ch"
+    [char]'ш' = "sh"
+    [char]'Ш' = "Sh"
+    [char]'щ' = "sch"
+    [char]'Щ' = "Sch"
+    [char]'ъ' = ""
+    [char]'Ъ' = ""
+    [char]'ы' = "y"
+    [char]'Ы' = "Y"
+    [char]'ь' = ""
+    [char]'Ь' = ""
+    [char]'э' = "e"
+    [char]'Э' = "E"
+    [char]'ю' = "yu"
+    [char]'Ю' = "Yu"
+    [char]'я' = "ya"
+    [char]'Я' = "Ya"
     }
-    Write-Output $userName
+    $outCHR=""
+    foreach ($CHR in $inCHR = $inString.ToCharArray())
+        {
+        if ($Translit[$CHR] -cne $Null )
+            {$outCHR += $Translit[$CHR]}
+        else
+            {$outCHR += $CHR}
+        }
+    Write-Output $outCHR
 }
 
-# Основной скрипт
-# Читаем файл с именами пользователей
-$users = Get-Content C:\Users\_______\Desktop\users.txt
-# Выводим вводные данные
+$users = Get-Content C:\Users\pvpeleshenko\Desktop\users.txt
 Write-Host;
 Write-Host "Вводные данные:" -ForegroundColor Gray
 Write-Host;
 $users
 Write-Host;
-# Создаем пустой массив для хранения сгенерированных имен пользователей
-$userNames = @()
-# Для каждого пользователя в файле
-foreach ($user in $users) {
-    # Разбиваем строку на фамилию, имя и отчество
-    $surname, $firstname, $middlename = $user.Split(' ')
-    # Генерируем имя пользователя из фамилии, имени и отчества
-    $userName = GenerateUserName($surname, $firstname, $middlename)
-    # Проверяем, существует ли такой пользователь в Active Directory и добавляем случайное число при необходимости
-    $userName = CheckUserExists($userName)
-    # Добавляем сгенерированное имя пользователя в массив
-    $userNames += $userName
-}
-# Выводим преобразованные данные
 Write-Host "Преобразованные данные:" -ForegroundColor Gray
 Write-Host;
-$userNames
+
+$logins = @()
+foreach ($user in $users) {
+    $parts = $user.Split(' ')
+    if ($parts.Count -eq 3) {
+        $surname = $parts[0]
+        $firstname = $parts[1]
+        $middlename = $parts[2]
+        $firstname = $firstname.substring(0,1)
+        $firstname = $firstname.ToLower()
+        $middlename = $middlename.substring(0,1)
+        $middlename = $middlename.ToLower()
+        $surname = $surname.ToLower()
+        $user = ($firstname.Substring(0,1)).ToUpper() + $firstname.Substring(1) + $middlename.ToUpper()[0] + ($surname.Substring(0,1)).ToUpper() + $surname.Substring(1)
+        $login = Translit($user)
+        $logins += $login
+    }
+    else {
+        Write-Host "Некорректные данные: $user"
+    }
+}
+
+# Создаем словарь для отслеживания сгенерированных имен пользователей
+$usernames = @{}
+
+# Проверка существования логинов в Active Directory и добавление суффикса к ним
+$logins = $logins | ForEach-Object {
+    $userExists = $true
+    $suffix = 1
+    while ($userExists) {
+        # Проверяем, было ли уже сгенерировано это имя пользователя
+        if ($usernames.ContainsKey($_)) {
+            # Если да, то увеличиваем суффикс на 1
+            $usernames[$_]++
+            $suffix = $usernames[$_]
+        } else {
+            # Если нет, то добавляем его в словарь
+            $usernames.Add($_, $suffix)
+        }
+        $newLogin = $_ + $suffix
+        $userExists = [bool] (Get-ADUser -Filter { SamAccountName -eq $newLogin })
+        if (!$userExists) {
+            break
+        }
+        $suffix++
+    }
+    $newLogin
+}
+$logins
