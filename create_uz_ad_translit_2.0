@@ -1,0 +1,65 @@
+# Функция для конвертации кириллицы в латиницу с помощью ConvertFrom-Cyrillic
+function Translit {
+    param([string]$inString)
+    $outString = $inString | ConvertFrom-Cyrillic -To Latin
+    Write-Output $outString
+}
+
+# Функция для генерации имени пользователя из фамилии, имени и отчества
+function GenerateUserName {
+    param([string]$surname, [string]$firstname, [string]$middlename)
+    # Преобразуем все строки в нижний регистр
+    $surname = $surname.ToLower()
+    $firstname = $firstname.ToLower()
+    $middlename = $middlename.ToLower()
+    # Берем первую букву имени и отчества
+    $firstname = $firstname[0]
+    $middlename = $middlename[0]
+    # Склеиваем все части имени пользователя
+    $userName = $firstname + $middlename + $surname
+    # Конвертируем кириллицу в латиницу
+    $userName = Translit($userName)
+    Write-Output $userName
+}
+
+# Функция для проверки существования пользователя в Active Directory и добавления случайного числа при необходимости
+function CheckUserExists {
+    param([string]$userName)
+    $userExists = $true
+    while ($userExists) {
+        # Проверяем, есть ли пользователь с таким именем в Active Directory
+        $userExists = [bool] (Get-ADUser -Filter { SamAccountName -eq $userName })
+        if ($userExists) {
+            # Если есть, то добавляем случайное число от 1 до 9 к имени пользователя
+            $userName = $userName + (Get-Random -Minimum 1 -Maximum 9)
+        }
+    }
+    Write-Output $userName
+}
+
+# Основной скрипт
+# Читаем файл с именами пользователей
+$users = Get-Content C:\Users\pvpeleshenko\Desktop\users.txt
+# Выводим вводные данные
+Write-Host;
+Write-Host "Вводные данные:" -ForegroundColor Gray
+Write-Host;
+$users
+Write-Host;
+# Создаем пустой массив для хранения сгенерированных имен пользователей
+$userNames = @()
+# Для каждого пользователя в файле
+foreach ($user in $users) {
+    # Разбиваем строку на фамилию, имя и отчество
+    $surname, $firstname, $middlename = $user.Split(' ')
+    # Генерируем имя пользователя из фамилии, имени и отчества
+    $userName = GenerateUserName($surname, $firstname, $middlename)
+    # Проверяем, существует ли такой пользователь в Active Directory и добавляем случайное число при необходимости
+    $userName = CheckUserExists($userName)
+    # Добавляем сгенерированное имя пользователя в массив
+    $userNames += $userName
+}
+# Выводим преобразованные данные
+Write-Host "Преобразованные данные:" -ForegroundColor Gray
+Write-Host;
+$userNames
