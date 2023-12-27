@@ -60,7 +60,7 @@ Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup DOMAIN\N
 Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup DOMAIN\NUR-FS-Admins -Permission full_control
 Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup DOMAIN\NUR_RSP_FS_UEB_RO -Permission read
 Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup DOMAIN\Nur_rsp_IB_Monitoring -Permission read
-Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup "DOMAIN\ROSPAN DFS Admins" -Permission read
+Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup "DOMAIN\Domain DFS Admins" -Permission read
 Remove-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup Everyone
 #Create dfs link
 New-DfsnFolder -Path "\\domain\shares\$groupName" -TargetPath "\\ip_address\$groupName`$"
