@@ -116,7 +116,7 @@ $usernames = @{}
 # Проверка существования логинов в Active Directory и добавление суффикса к ним
 $logins = $logins | ForEach-Object {
     $userExists = $true
-    $suffix = 1
+    $suffix = null
     while ($userExists) {
         # Проверяем, было ли уже сгенерировано это имя пользователя
         if ($usernames.ContainsKey($_)) {
