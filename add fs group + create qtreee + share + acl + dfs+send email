@@ -25,7 +25,7 @@ Write-Host "Группы доступа:"
 $servers = @("ip_address")
  
 # Create PSCredential
-$credential = New-Object System.Management.Automation.PSCredential("admin", (ConvertTo-SecureString "NurN3t@pp" -AsPlainText -Force))
+$credential = New-Object System.Management.Automation.PSCredential("admin", (ConvertTo-SecureString "password" -AsPlainText -Force))
  
 foreach ($server in $servers) {
    # Connect to NetApp
