@@ -54,7 +54,7 @@ Set-NcQuota -Vserver $vserverName -Path $QutaPath -DiskLimit 20500mb
 Add-NcCifsShare -Vserver $vserverName -Name $groupName -Path $sharePath -Comment $groupDescription
 
 # Assign the groups to the share
-#Set-NcCifsShare -VServer $vserverName -Name $groupName -CifsShareAcl "DOMAIN\NUR_RSP_FS_$($groupName)_RO:read,NUR_RSP_FS_$($groupName)_RW:readwrite"
+#
 Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup DOMAIN\NUR_RSP_FS_$($groupName)_RO -Permission read
 Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup DOMAIN\NUR_RSP_FS_$($groupName)_RW -Permission change
 Add-NcCifsShareAcl -Vserver $vserverName -Share $groupName -UserOrGroup DOMAIN\NUR-FS-Admins -Permission full_control
