@@ -40,7 +40,7 @@ $vserverName = "host name"
 # Получите список всех volume
 $volumes = Get-NcVol
  
-# Найдите volume с наибольшим объемом свободного места среди томов с названием "nas10_aggr11_vol"
+# Найдите volume с наибольшим объемом свободного места среди тех у кого включена дедупликация
 $volumeWithMostFreeSpace = $volumes | Where-Object { $_.Dedupe -eq "True" } | Sort-Object Available | Select-Object -Last 1
  
 $volumeneed = $volumeWithMostFreeSpace.Name
