@@ -1,0 +1,121 @@
+# Импорт модуля Outlook
+Add-Type -Assembly "Microsoft.Office.Interop.Outlook"
+$outlook = New-Object -ComObject Outlook.Application 
+$namespace = $outlook.GetNameSpace("MAPI")
+
+# Получение писем из папки "Входящие"
+$inbox = $namespace.GetDefaultFolder([Microsoft.Office.Interop.Outlook.OlDefaultFolders]::olFolderInbox)
+$mails = $inbox.Items
+
+# Получение текущей даты
+$now = Get-Date
+
+# Чтение списка групп из файла group.txt 
+$groups = Get-Content -Path "C:\Users\userprofile\Desktop\groupname.txt"
+
+# Отображение писем за последние 5 минут с темой "RE: Назначить роли" от отправителя "Иванов Иван Иванович"
+$mails | Where-Object { $_.Subject -eq "RE: Назначить роли" -and $_.SenderName -eq "Иванов Иван Иванович" -and $_.ReceivedTime -gt $now.AddMinutes(-170) } | ForEach-Object {
+    Write-Output ("--------------------------------------------")
+    Write-Output ("Subject: " + $_.Subject)
+    Write-Output ("Sender: " + $_.SenderName)
+    Write-Output ("Received: " + $_.ReceivedTime)
+    if ($_.UnRead -eq $true) {
+        Write-Output ("Status: Unread")
+    } else {
+        Write-Output ("Status: Read")
+    }
+    #Write-Output ("----------------------------------")
+
+    # Получение временного штампа письма
+    $mailTimestamp = $_.ReceivedTime
+
+    # Проверка на наличие ответов на это письмо
+    Write-Output ("--------------------------------------------")
+    $replies = $mails | Where-Object { $_.Subject -eq "RE: Назначить роли" -and $_.SenderName -ne "Иванов Иван Иванович" -and $_.ReceivedTime -gt $mailTimestamp }
+    if ($replies -ne $null) {
+        
+        #Write-Output ("Found replies to this email:")
+        $replies | ForEach-Object {
+            Write-Output ("----------------------------------")
+            Write-Output ("Reply Subject: " + $_.Subject)
+            Write-Output ("Reply Sender: " + $_.SenderName)
+            Write-Output ("Reply Received: " + $_.ReceivedTime)
+            if ($_.UnRead -eq $true) {
+                Write-Output ("Reply Status: Unread")
+            } else {
+                Write-Output ("Reply Status: Read")
+            }
+            Write-Output ("----------------------------------")
+        }
+    } else {
+        Write-Output ("No replies found for this email.")
+        Write-Output ("Email Body: " + $_.Body)
+    }
+
+    # Получение тела письма
+    $body = $_.Body
+
+    # Проверка наличия предложения
+function ExtractTextBetweenWords($text, $word1, $word2) {
+   $startIndex = $text.IndexOf($word1)
+   $endIndex = $text.IndexOf($word2)
+
+   if ($startIndex -ne -1 -and $endIndex -ne -1) {
+       $startIndex += $word1.Length
+       $length = $endIndex - $startIndex
+       $extractedText = $text.Substring($startIndex, $length).Trim()
+
+       # Разделение текста на строки
+       $lines = $extractedText -split "`n"
+       $counter = 1
+       for ($i=0; $i -lt $lines.Length; $i++) {
+           if ($lines[$i].Trim()) {
+               $lines[$i] = "$counter. $($lines[$i])"
+               $counter++
+           }
+       }
+       # Объединение строк обратно в текст
+       return $lines -join "`n"
+   }
+   else {
+       return $null
+   }
+}
+
+$fiouz = (ExtractTextBetweenWords $text $word1 $word2)
+# Тест функции
+$text = "$body"
+$word1 = "сотрудникам:"
+$word2 = "Уважением"
+
+# Выводим массив строк
+
+Write-Host (ExtractTextBetweenWords $text $word1 $word2)
+
+# Разделение текста на строки и удаление номеров
+$names = $extractedText -split "`n" | ForEach-Object { $_ -replace '^\d+\. ', '' }
+
+foreach ($name in $names) {
+    # Поиск учетной записи по ФИО
+    $user = Get-ADUser -Filter "Name -eq '$name'"
+    
+    if ($user) {
+        # Получение контейнера пользователя
+        $container = (Get-ADUser $user.DistinguishedName -Properties CanonicalName).CanonicalName
+        Write-Output ("Найден пользователь: " + $user)
+        Write-Output ("--------------------------------------------") 
+        Write-Output ("В контейнере: " + $container) 
+        Write-Output ("--------------------------------------------")
+        # Получение групп пользователя
+        $groups = Get-ADUser $user.DistinguishedName -Properties MemberOf | Select-Object -ExpandProperty MemberOf
+        Write-Output ("Его группы: ")
+        foreach ($group in $groups) {
+            Write-Output ("- " + (Get-ADGroup $group).Name)
+        }
+    } else {
+        Write-Output ("User not found: " + $name)
+    }
+    Write-Output ("--------------------------------------------")
+}
+
+}
