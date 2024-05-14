@@ -12,8 +12,8 @@ $ou = "OU=Groups,DC=domain,DC=ru"
  
 # Создание групп
 Write-Host;
-New-ADGroup -Name "NUR_RSP_FS_$($groupName)_RO" -DisplayName "NUR_RSP_FS_$($groupName)_RO" -Description $groupDescription -GroupScope Global -Path $ou
-New-ADGroup -Name "NUR_RSP_FS_$($groupName)_RW" -DisplayName "NUR_RSP_FS_$($groupName)_RW" -Description $groupDescription -GroupScope Global -Path $ou
+New-ADGroup -Name "NUR_RSP_FS_$($groupName)_RO" -DisplayName "NUR_RSP_FS_$($groupName)_RO" -Description "$groupDescription" -GroupScope Global -Path $ou
+New-ADGroup -Name "NUR_RSP_FS_$($groupName)_RW" -DisplayName "NUR_RSP_FS_$($groupName)_RW" -Description "$groupDescription" -GroupScope Global -Path $ou
 Write-Host;
 Write-Host "Ресурс создан: \\shares\$groupName$"
 Write-Host;
@@ -49,9 +49,9 @@ $sharePath = "/$volumeneed/$groupName"
 $QutaPath = "/vol/$volumeneed/$groupName"
 # Создайте новый qtree WORK
 New-NcQtree -Vserver $vserverName -Volume $volumeneed -Qtree $groupName
-Set-NcQuota -Vserver $vserverName -Path $QutaPath -DiskLimit 20500mb 
+Set-NcQuota -Vserver $vserverName -Path $QutaPath -DiskLimit 20900mb 
 # Создайте новый сетевой ресурс 
-Add-NcCifsShare -Vserver $vserverName -Name $groupName -Path $sharePath -Comment $groupDescription
+Add-NcCifsShare -Vserver $vserverName -Name $groupName -Path $sharePath -Comment "$groupDescription"
 
 # Assign the groups to the share
 #
